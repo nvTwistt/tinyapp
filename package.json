@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nvTwistt/tinyapp/issues"
   },
-  "homepage": "https://github.com/nvTwistt/tinyapp#readme"
+  "homepage": "https://github.com/nvTwistt/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
