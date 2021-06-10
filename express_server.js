@@ -3,11 +3,18 @@ const app = express();
 const PORT = 8080; // default port 8080
 const _ = require("./helper.js")
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
-
+const cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session')
+const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+//app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret key'],
 
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 app.set("view engine", "ejs");
 
@@ -52,7 +59,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const id = req.cookies['user_id'];
+  //const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const templateVars = { urls: urlDatabase, user_id: id, users};
   if(id){
     res.render("urls_index", templateVars);
@@ -62,7 +70,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const id = req.cookies['user_id'];
+  //const id = req.cookies['user_id'];
+  const id = req.session.user_id;
+  //console.log(id, sessionID);
   const templateVars = {user_id: id, users};
   if(id){
     res.render("urls_new", templateVars);
@@ -74,32 +84,37 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const miniURL = req.params.shortURL;
   const bigURL = urlDatabase[miniURL].longURL;
-  const id = req.cookies['user_id'];
+  //const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const templateVars = { shortURL: miniURL, longURL: bigURL, user_id: id, users};
   res.render("urls_show", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  const id = req.cookies['user_id'];
+  //const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const templateVars = {user_id: id, users};
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  const id = req.cookies['user_id'];
+  // const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const templateVars = {user_id: id, users};
   res.render("urls_login", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const urlID = _.generateRandomString(6);
-  const id = req.cookies['user_id'];
+  // const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   urlDatabase[urlID] = {longURL: req.body.longURL, userID: id };  
   res.redirect(`/urls/${urlID}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const id = req.cookies['user_id'];
+  // const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const urlId = req.params.shortURL;
   if(id){
     delete urlDatabase[urlId];
@@ -108,7 +123,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const id = req.cookies['user_id'];
+  // const id = req.cookies['user_id'];
+  const id = req.session.user_id;
   const miniURL = req.params.shortURL;
   const newURL = req.body.new;
   if(id){
@@ -126,16 +142,21 @@ app.post("/login", (req, res) => {
     return res.status(403).send("User does not exists");
   }
   const dbPassword = _.getUserPassword(user, users);
-  if(dbPassword !== userPassword){
+  console.log(dbPassword, userPassword);
+  const hashedPassword = bcrypt.hashSync(userPassword, 10);
+  console.log(userPassword, hashedPassword);
+  if(!bcrypt.compareSync(userPassword, hashedPassword)){
     return res.status(403).send("Password is incorrect");
   }
   const currentId = _.getUserId(user, users);
-  res.cookie('user_id', currentId);
+  // res.cookie('user_id', currentId);
+  req.session.user_id = currentId;
   res.redirect(302, "/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id')
+  // res.clearCookie('user_id')
+  req.session = null;
   res.redirect(302, "/urls");
 });
 
@@ -151,9 +172,11 @@ app.post("/register", (req, res) => {
     return res.status(400).send("400 error, user exists in database");
   }
   const newId = _.generateRandomString(6);
-  const newUser = {id: newId, email: userEmail, password:userPassword};
+  const hashedPassword = bcrypt.hashSync(userPassword, 10);
+  const newUser = {id: newId, email: userEmail, password:hashedPassword};
   users[newId] = newUser;
-  res.cookie('user_id', newId);
+  // res.cookie('user_id', newId);
+  req.session.user_id = newId;
   res.redirect("/urls");
 });
 app.listen(PORT, () => {
