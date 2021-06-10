@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>Register</title>
 </head>
+
 <body>
   <%- include('partials/_header') %>
-  <h2>Create A New Account</h2>
-  <form method="POST" action="/register">
-    <label for="email">User Eamil</label>
-    <input id="email" type="email" name="email"/>
-    <label for="password">Password</label>
-    <input id="password" type="password" name="password"/>
-      <button type="submit">Submit</button>
-    </form>
+  <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Register Now</h5>
+        <br/>
+        <form method="POST" action= "/register">
+          <label for="email">User Email: </label>
+          <input name="email" type="email" required/>
+          <label for="password">Password: </label>
+          <input name="password" type="password" required/>
+          <button type="submit">Register</button>
+        </form>
+      </div>
+  </div>
 </body>
 </html>
