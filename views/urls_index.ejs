@@ -22,26 +22,19 @@
         </tr>
       </thead>
       <tbody>
-        <% console.log(user_id) %>
         <% for(let userURL in urls) { %>
-          <% console.log(urls[userURL].userID) %>
-          
           <tr>
             <td><%= userURL %></td>
             <td><%= urls[userURL].longURL %> </td>
             <td>
-              <%if (user_id === urls[userURL].userID) { %>
                 <form method="GET" action=<%=`/urls/${userURL}`%>>
                   <button type="submit" class="btn btn-primary"> Edit </button>
                 </form>
-                <% } %>
             </td>
-            <td>
-              <%if (user_id === urls[userURL].userID) { %>
+            <td>   
               <form method="POST" action=<%=`/urls/${userURL}/delete`%>>
                 <button type="submit" class="btn btn-danger"> Delete </button>
-              </form>
-              <% } %>
+              </form>          
             </td>
           </tr>
         <% } %>

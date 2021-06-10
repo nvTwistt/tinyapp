@@ -17,7 +17,7 @@ const testUsers = {
 
 describe('emailFinder', function() {
   it('should return a user with valid email', function() {
-    const user = emailFinder("user@example.com", users)
+    const user = emailFinder("user@example.com", testUsers)
     const expectedOutput = "userRandomID";
     // Write your assert statement here
     assert.strictEqual(user, expectedOutput);
@@ -25,7 +25,7 @@ describe('emailFinder', function() {
 });
 describe('emailFinder', function() {
     it('should return a user with valid email', function() {
-      const user = emailFinder("user@example.com", users)
+      const user = emailFinder("user@example.com", testUsers)
       const expectedOutput = "userRandomID";
       // Write your assert statement here
       assert.strictEqual(user, expectedOutput);
@@ -33,7 +33,7 @@ describe('emailFinder', function() {
 });
 describe('emailFiner', function() {
     it('should return undefined', function() {
-      const user = getUserByEmail("", users)
+      const user = getUserByEmail("", testUsers)
       const expectedOutput = undefined;
       // Write your assert statement here
       assert.strictEqual(user, expectedOutput);

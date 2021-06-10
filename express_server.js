@@ -3,11 +3,9 @@ const app = express();
 const PORT = 8080; // default port 8080
 const _ = require("./helper.js")
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
-//app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['secret key'],
@@ -41,11 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let userID = req.params.id;
-  if(urlDatabase[userID] === false) {
-    return res.status(400).send("You do not have permission to delete URL")
-  }
-  const miniURL = req.params.shortURL;
+  const miniURL = _.fetchShortUrl(req);
   const longURL = urlDatabase[miniURL].longURL;
   res.redirect(longURL);
 });
@@ -59,8 +53,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  //const id = req.cookies['user_id'];
-  const id = req.session.user_id;
+  const id = _.fetchSessionId(req);
   const templateVars = { urls: urlDatabase, user_id: id, users};
   if(id){
     res.render("urls_index", templateVars);
@@ -70,9 +63,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  //const id = req.cookies['user_id'];
-  const id = req.session.user_id;
-  //console.log(id, sessionID);
+  const id = _.fetchSessionId(req);
   const templateVars = {user_id: id, users};
   if(id){
     res.render("urls_new", templateVars);
@@ -82,100 +73,93 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const miniURL = req.params.shortURL;
+  const miniURL = _.fetchShortUrl(req);
   const bigURL = urlDatabase[miniURL].longURL;
-  //const id = req.cookies['user_id'];
-  const id = req.session.user_id;
+  const id = _.fetchSessionId(req);
   const templateVars = { shortURL: miniURL, longURL: bigURL, user_id: id, users};
   res.render("urls_show", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  //const id = req.cookies['user_id'];
-  const id = req.session.user_id;
+  const id = _.fetchSessionId(req);
   const templateVars = {user_id: id, users};
   res.render("urls_register", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  // const id = req.cookies['user_id'];
-  const id = req.session.user_id;
+  const id = _.fetchSessionId(req);
   const templateVars = {user_id: id, users};
   res.render("urls_login", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const urlID = _.generateRandomString(6);
-  // const id = req.cookies['user_id'];
-  const id = req.session.user_id;
+  const id = _.fetchSessionId(req);
   urlDatabase[urlID] = {longURL: req.body.longURL, userID: id };  
   res.redirect(`/urls/${urlID}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  // const id = req.cookies['user_id'];
-  const id = req.session.user_id;
-  const urlId = req.params.shortURL;
-  if(id){
-    delete urlDatabase[urlId];
+  const id = _.fetchSessionId(req);
+  const miniURL = _.fetchShortUrl(req);
+  const dbUserID = _.fetchIdFromDatabase(urlDatabase, miniURL);
+  if(id === dbUserID){
+    delete urlDatabase[miniURL];
+  } else {
+    return res.status(400).send("You don't have permission to delete this url");
   }
   res.redirect(302, "/urls");
 });
 
-app.post("/urls/:shortURL", (req, res) => {
-  // const id = req.cookies['user_id'];
-  const id = req.session.user_id;
-  const miniURL = req.params.shortURL;
+app.post("/urls/:shortURL/edit", (req, res) => {
+  const id = _.fetchSessionId(req);
+  const miniURL = _.fetchShortUrl(req);
   const newURL = req.body.new;
-  if(id){
+  const dbUserID = _.fetchIdFromDatabase(urlDatabase, miniURL);
+  if(id === dbUserID){
     urlDatabase[miniURL].longURL = newURL;
+  } else {
+    return res.status(404).send("You don't have permission to edit the URL");
   }
   res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
-  const body = req.body;
-  const userEmail = body.email;
-  const userPassword = body.password;
-  const user = _.emailFinder(userEmail, users);
-  if(!user){
+  const userData = _.userDataExtraction(req);
+  const user = _.emailFinder(userData.email, users);
+  if (!user){
     return res.status(403).send("User does not exists");
   }
   const dbPassword = _.getUserPassword(user, users);
-  console.log(dbPassword, userPassword);
-  const hashedPassword = bcrypt.hashSync(userPassword, 10);
-  console.log(userPassword, hashedPassword);
-  if(!bcrypt.compareSync(userPassword, hashedPassword)){
+  if (!bcrypt.compareSync(userData.password, dbPassword)){
     return res.status(403).send("Password is incorrect");
   }
+  if (!userData.password || !userData.email) {
+    return res.status(404).send("must fill out required fields");
+  }
   const currentId = _.getUserId(user, users);
-  // res.cookie('user_id', currentId);
   req.session.user_id = currentId;
   res.redirect(302, "/urls");
 });
 
 app.post("/logout", (req, res) => {
-  // res.clearCookie('user_id')
   req.session = null;
   res.redirect(302, "/urls");
 });
 
 app.post("/register", (req, res) => {
-  const body = req.body;
-  const userEmail = body.email;
-  const userPassword = body.password;
-  if(!userEmail || !userPassword){
+  const userData = _.userDataExtraction(req);
+  if(!userData.email || !userData.password){
     return res.status(400).send("400 error, fields cannot be empty");
   }
-  const userExists = _.emailFinder(userEmail, users)
+  const userExists = _.emailFinder(userData.email, users)
   if(userExists){
     return res.status(400).send("400 error, user exists in database");
   }
   const newId = _.generateRandomString(6);
-  const hashedPassword = bcrypt.hashSync(userPassword, 10);
-  const newUser = {id: newId, email: userEmail, password:hashedPassword};
+  const hashedPassword = bcrypt.hashSync(userData.password, 10);
+  const newUser = {id: newId, email: userData.email, password:hashedPassword};
   users[newId] = newUser;
-  // res.cookie('user_id', newId);
   req.session.user_id = newId;
   res.redirect("/urls");
 });
