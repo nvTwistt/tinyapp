@@ -6,6 +6,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["screenshot of login page"](https://github.com/nvTwistt/tinyapp/blob/master/docs/login.png)
 !["screenshot of new URL page"](https://github.com/nvTwistt/tinyapp/blob/master/docs/new.png)
+!["screenshot of shortURL page"](https://github.com/nvTwistt/tinyapp/blob/master/docs/shortURL.png)
+!["screenshot of URL's page"](https://github.com/nvTwistt/tinyapp/blob/master/docs/urls.png)
+
 
 ## Dependencies
 
