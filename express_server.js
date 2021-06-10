@@ -34,6 +34,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  let userID = req.params.id;
+  if(urlDatabase[userID] === false) {
+    return res.status(400).send("You do not have permission to delete URL")
+  }
   const miniURL = req.params.shortURL;
   const longURL = urlDatabase[miniURL].longURL;
   res.redirect(longURL);

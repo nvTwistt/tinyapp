@@ -14,15 +14,15 @@
         <a class="navbar-brand"> Logged in as: <%=users[user_id].email%></a>
         <br/>
         <form class="form-inline" method="POST" action="/logout">
-          <button type="submit" class="btn btn-outline-dark"> Logout </button>
+          <button type="submit" class="btn btn-dark"> Logout </button>
         </form>
 
     <% } else{ %>  
         <form method="GET" action=<%=`/login`%>>
-          <button type="submit" class="btn btn-outline-dark"s> Login </button>
+          <button type="submit" class="btn btn-light"s> Login </button>
         </form>
         <form method="GET" action=<%=`/register`%>>
-          <button type="submit" class="btn btn-outline-dark"> Register </button>
+          <button type="submit" class="btn btn-dark"> Register </button>
         </form>
 
    <% } %>
