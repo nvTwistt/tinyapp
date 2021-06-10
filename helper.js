@@ -1,70 +1,71 @@
-const GetMyURL = function (id,urlDatabase) {
+const GetMyURL = function(id,urlDatabase) {
   const keys = Object.keys(urlDatabase);
   let returnArray = [];
-  for(const key of keys){
+  for (const key of keys) {
     const shortURL = urlDatabase[key];
-    if (shortURL.userID === id){
+    if (shortURL.userID === id) {
       returnArray.push(key);
     }
   }
   return returnArray;
-}
+};
 
-const emailFinder = function (email, users){
+const emailFinder = function(email, users) {
   const keys = Object.keys(users);
-  for(const key of keys){
+  for (const key of keys) {
     const user = users[key];
-    if (user.email === email){
+    if (user.email === email) {
       return user.id;
     }
   }
   return undefined;
-}
+};
 
-function generateRandomString(length) {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i <= length; i++) {
+const generateRandomString = function(length) {
+  let text = "";
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i <= length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
-  return text;  
-}
+  return text;
+};
 
-function getUserPassword(user, users){
-  return users[user].password
-}
+const getUserPassword = function(user, users) {
+  return users[user].password;
+};
 
-function getUserId(user,users){
+const getUserId = function(user,users) {
   return users[user].id;
-}
+};
 
-function fetchShortUrl(req) {
+const fetchShortUrl = function(req) {
   return req.params.shortURL;
-}
+};
 
-function fetchSessionId(req) {
-  return req.session.user_id;
-}
+const fetchSessionId = function(req) {
+  return req.session.myUserId;
+};
 
-function fetchIdFromDatabase(urlDatabase, url) {
+const fetchIdFromDatabase = function(urlDatabase, url) {
   return urlDatabase[url].userID;
-}
+};
 
-function userDataExtraction(req) {
+const userDataExtraction = function(req) {
   const body = req.body;
   const userEmail = body.email;
   const userPassword = body.password;
   return {email: userEmail, password: userPassword};
-}
+};
 
-module.exports = 
-  {GetMyURL, 
+module.exports =
+  {
+    GetMyURL,
     emailFinder,
-    generateRandomString, 
-    getUserPassword, 
+    generateRandomString,
+    getUserPassword,
     getUserId,
     fetchShortUrl,
     fetchSessionId,
     fetchIdFromDatabase,
     userDataExtraction
-  }  
+  };

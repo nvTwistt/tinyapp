@@ -10,8 +10,8 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if(users[user_id]){ %>
-        <a class="navbar-brand"> Logged in as: <%=users[user_id].email%></a>
+    <% if(users[myUserId]){ %>
+        <a class="navbar-brand"> Logged in as: <%=users[myUserId].email%></a>
         <br/>
         <form class="form-inline" method="POST" action="/logout">
           <button type="submit" class="btn btn-dark"> Logout </button>
