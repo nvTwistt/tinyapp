@@ -22,9 +22,15 @@
         </tr>
       </thead>
       <tbody>
+        <% console.log(urls) %>
+        <% console.log(myUserId) %>
         <% for(let userURL in urls) { %>
           <tr>
-            <td><%= userURL %></td>
+            <% if (urls[userURL].userID === myUserId) { %>
+              <td><%= userURL %></td>
+            <%} else { %>
+              <td><%= ""%></td>
+              <% } %>
             <td><%= urls[userURL].longURL %> </td>
             <td>
                 <form method="GET" action=<%=`/urls/${userURL}`%>>
