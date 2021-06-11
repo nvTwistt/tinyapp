@@ -67,13 +67,18 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_login", templateVars);
   }
 });
-
 app.get("/urls/:shortURL", (req, res) => {
   const miniURL = _.fetchShortUrl(req);
   const bigURL = urlDatabase[miniURL].longURL;
   const id = _.fetchSessionId(req);
+  const dbUserID = _.fetchIdFromDatabase(urlDatabase, miniURL);
   const templateVars = { shortURL: miniURL, longURL: bigURL, myUserId: id, users};
-  res.render("urls_show", templateVars);
+  if (id === dbUserID) {
+    res.render("urls_show", templateVars);
+  } else {
+    return res.status(404).send("You don't have permission to edit the URL");
+  }
+  
 });
 
 app.get("/register", (req, res) => {
@@ -91,8 +96,12 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   const urlID = _.generateRandomString(6);
   const id = _.fetchSessionId(req);
-  urlDatabase[urlID] = {longURL: req.body.longURL, userID: id };
-  res.redirect(`/urls/${urlID}`);
+  if(id) {
+    urlDatabase[urlID] = {longURL: req.body.longURL, userID: id };
+    res.redirect(`/urls/${urlID}`);
+  } else {
+    res.status(400).send("Please login");
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -107,7 +116,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(302, "/urls");
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => {
+
+
+app.post("/urls/:shortURL/update", (req, res) => {
   const id = _.fetchSessionId(req);
   const miniURL = _.fetchShortUrl(req);
   const newURL = req.body.new;
