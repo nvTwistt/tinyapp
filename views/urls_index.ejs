@@ -26,9 +26,6 @@
           <tr>
             <% if (urls[userURL].userID === myUserId) { %>
               <td><%= userURL %></td>
-            <%} else { %>
-              <td><%= ""%></td>
-              <% } %>
             <td><%= urls[userURL].longURL %> </td>
             <td>
                 <form method="GET" action=<%=`/urls/${userURL}`%>>
@@ -40,6 +37,7 @@
                 <button type="submit" class="btn btn-danger"> Delete </button>
               </form>          
             </td>
+            <%} %>
           </tr>
         <% } %>
       </tbody>

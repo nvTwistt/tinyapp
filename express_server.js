@@ -45,8 +45,13 @@ app.get("/", (req, res) => {
  */
 app.get("/u/:shortURL", (req, res) => {
   const miniURL = _.fetchShortUrl(req);
-  const longURL = urlDatabase[miniURL].longURL;
-  res.redirect(longURL);
+  if (urlDatabase[miniURL]) {
+    const longURL = urlDatabase[miniURL].longURL;
+    res.redirect(longURL);
+  } else {
+    return res.status(404).send("URL does not exist, please use a valid URL.");
+  }
+  
 });
 
 app.get("/urls.json", (req, res) => {
@@ -64,7 +69,7 @@ app.get("/urls", (req, res) => {
   if (id) {
     res.render("urls_index", templateVars);
   } else {
-    res.render("urls_login", templateVars);
+    return res.status(404).send("Cannot access page, please login.");
   }
 });
 /**
@@ -90,7 +95,13 @@ app.get("/urls/new", (req, res) => {
  */
 app.get("/urls/:shortURL", (req, res) => {
   const miniURL = _.fetchShortUrl(req);
-  const bigURL = urlDatabase[miniURL].longURL;
+  let bigURL;
+  if (urlDatabase[miniURL]) {
+    bigURL = urlDatabase[miniURL].longURL;
+  } else {
+    return res.status(404).send("Please enter a valid tiny URL.");
+  }
+  
   const id = _.fetchSessionId(req);
   const dbUserID = _.fetchIdFromDatabase(urlDatabase, miniURL);
   const templateVars = { shortURL: miniURL, longURL: bigURL, myUserId: id, users};
@@ -108,8 +119,12 @@ app.get("/urls/:shortURL", (req, res) => {
  */
 app.get("/register", (req, res) => {
   const id = _.fetchSessionId(req);
-  const templateVars = {myUserId: id, users};
-  res.render("urls_register", templateVars);
+  if (id) {
+    res.redirect(302, "/urls");
+  } else {
+    const templateVars = {myUserId: id, users};
+    res.render("urls_register", templateVars);
+  }
 });
 /**
  * get request for /login
@@ -117,8 +132,12 @@ app.get("/register", (req, res) => {
  */
 app.get("/login", (req, res) => {
   const id = _.fetchSessionId(req);
-  const templateVars = {myUserId: id, users};
-  res.render("urls_login", templateVars);
+  if (id) {
+    res.redirect(302, "/urls");
+  } else {
+    const templateVars = {myUserId: id, users};
+    res.render("urls_login", templateVars);
+  }
 });
 
 /**
@@ -207,7 +226,7 @@ app.post("/login", (req, res) => {
  */
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect(302, "/urls");
+  res.redirect(302, "/login");
 });
 /**
  * Post request for /register/
